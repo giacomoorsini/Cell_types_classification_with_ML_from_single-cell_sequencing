@@ -31,6 +31,8 @@ Authors: Laia Torres Madsdeu, Giacomo Orsini
     - Umap
   - Feature encoding and dataset splitting
 - Models benchmarking
+  - Hyperparameters tuning
+  - Evaluation metrics 
   - Random forest
     - Baseline assessment
     - Hyperparameter tuning
@@ -154,4 +156,24 @@ Feature encoding is the process of converting categorical data or other types of
 The datasets have to be split into training and testing subsets, with a proportion of 80 and 20. The models will be fit on the training data, which have to be representative of the whole dataset; after training, the model will be tested on the testing set, where it will predict the class of the unlabeled cells.
 K-fold Cross-validation, a procedure that helps ensure that the model's performance is consistent and not dependent on a particular split of the data, has also been performed: the training set has been divided into smaller subsets; at every iteration, one of the splits will be used to test the model and test the performance of each parameter (in the case of hyperparameter tuning). The scripts and results of this step can be found in the final report, `AML_LTM_GO.ipynb`.
 
+## Models benchmarking
+For each machine-learning technique, Random forest (RF and Multilayer Perceptron (MLP), multiple models were created, and multiple benchmarking was carried out:
+- For each method, 4 models were created, considering the 4 datasets of dimensionality reduction: no reduction, PCA, t-SNE, UMAP.
+- For each method, a baseline assessment of the models with default parameters and an assessment with hyperparameter tuning were made. The parameters were tuned using a grid search method. The best model of the hyperparameter tuning benchmarking was selected and compared with the baseline assessment.
+- Finally, the best models of the two ML methods were compared.
+
+### Hyperparameters tuning
+Machine learning models have a set of tunable parameters that can substantially change the analysis's outcome. The models were fine-tuned by performing a Grid Search with Cross-Validation. A grid search is a computational technique in which different established sets of hyperparameters are tested in all their possible combinations. The parameters of each ML method considered in the grid search have been:
+- Random Forest
+  - `n_estimators`: number of decision trees in the random forest. Increasing n_estimators   generally improves the performance of the model until a certain point, where additional trees may not significantly improve accuracy but increase computational cost. In this case, the values used have been 100, 500, 1000, and 1200, exploring a range from a relatively small forest to larger forests, which helps in finding the optimal balance between accuracy and computational efficiency.
+  - `max_features`: determines the maximum number of features to consider when looking for the best split at each node. By restring (or not) the number of features, the right max_features can prevent overfitting and improve the diversity among the trees in the forest. The options chosen were 'sqrt' (square root of the number of features), 'log2' (log base 2 of the number of features), and None (consider all features).
+  - `bootstrap`: indicates whether bootstrap samples are used when building trees. Bootstrap sampling introduces randomness and diversity in each tree, which can improve the overall performance of the forest. If False, the whole dataset is used to build each tree.
+- Multilayer perceptron
+  - `Number of Layers`: the number of layers that compose the neural network. This can affect the ability to learn complex patterns. Deeper networks can potentially learn more intricate features but can also lead to overfitting.
+  - `Type of Activation Function`: activation functions (e.g., ReLU, sigmoid, tanh) introduce non-linearity, which is crucial for the network to learn and approximate complex functions. ReLU is usually a common choice for hidden layers; softmax for multi-class classification; sigmoid for binary classification.
+  - `Units (Number of Neurons)`: determines the capacity of each layer to learn representations. Too few neurons may limit learning capacity; too many may lead to overfitting.
+  - `Dropout Rate`: Dropout helps prevent overfitting by randomly setting a fraction of input units to 0 during training, forcing the network to learn redundant representations.
+  - `Learning Rate`: the learning rate controls how much to change the model in response to the estimated error each time the model weights are updated. It is a crucial parameter to tune, and the optimal values can vary widely.
+
+### Evaluation metrics
 
