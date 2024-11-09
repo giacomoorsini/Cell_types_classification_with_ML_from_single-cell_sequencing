@@ -6,12 +6,13 @@ Authors: Laia Torres Madsdeu, Giacomo Orsini
 
 # Index
 - Introduction
+  - Aim of the project 
   - The Data
     - Single-cell sequencing
     - Tabula Muris
   - Application of machine learning models
     - Random Forests
-    - Multilayer Perceptrons   
+    - Multilayer Perceptrons
   - Libraries and modules   
 - Data preparation
   - Data retrieval
@@ -28,7 +29,7 @@ Authors: Laia Torres Madsdeu, Giacomo Orsini
     - PCA
     - t-SNE
     - Umap
-  - Feature encoding
+  - Feature encoding and dataset splitting
 - Models benchmarking
   - Random forest
     - Baseline assessment
@@ -39,12 +40,19 @@ Authors: Laia Torres Madsdeu, Giacomo Orsini
 - Conclusion
 
 # Introduction 
-The project hereby presented aims to show how two different machine learning models perform on the same (rather simple) biological task. The aims were met, and the project, stored in `AML_LTM_GO.ipynb`, has been positively valued with a grade of 30L. In this READ.ME, some of the instructions and the logic behind the steps are reported, while all the scripts can be found in the `AML_LTM_GO.ipynb`.
+The project hereby presented was made for the final exam of the Advanced Machine Learning course. The goal was to implement machine learning models in biological tasks. The aims were met, and the project, stored in `AML_LTM_GO.ipynb`, has been positively valued with a grade of 30L. In this READ.ME, some of the instructions and the logic behind the steps are reported, while all the scripts can be found in the `AML_LTM_GO.ipynb`.
 
 - Le H, Peng B, Uy J, Carrillo D, Zhang Y, Aevermann BD, et al. (2022) Machine learning for cell type classification from single nucleus RNA sequencing data. PLoS ONE 17(9): e0275070. https://doi.org/10.1371/journal.pone.0275070
 - The Tabula Muris Consortium. Overall coordination. Logistical coordination. et al. Single-cell transcriptomics of 20 mouse organs creates a Tabula Muris. Nature 562, 367–372 (2018). https://doi.org/10.1038/s41586-018-0590-4
 - Advanced Machine Learning course notes by Professor Daniele Bonacorsi
 - Keras, Sci-kit learn and Tensorflow information sheets.
+
+# Aim of the project
+In this project, the performance of two different machine learning methods was evaluated on the same biological task: recognizing cell types in RNA single-cell sequencing data. The machine learning models we used have been Random Forests and Multilayer Perceptrons (MLP).
+
+The cell type recognition task has been carried out on the heart tissue of Mus Musculus (mouse); the cells that compose this tissue are fibroblast, endothelial cell, leukocyte, myofibroblast cell, endocardial cell, cardiac muscle cell, and smooth muscle cell. Moreover, the data used all come from FACS-based full-length transcript analysis.
+
+After preprocessing, different dimensionality reduction/visualization methods (PCA, t-SNE and UMAP) were used, resulting in a total of 4 datasets, which have been used to train the models. For these 4 datasets, both the Random Forest and the MLP have been run with a cross-validation approach to tune different hyperparameters and select the best ones. The best models from the two machine learning methods have been compared.
 
 # The Data
 ## Single-cell sequencing
@@ -97,7 +105,53 @@ In particular, three libraries are often used for ML implementations in python:
 Data has been retrieved from the Mus Muluscus database (The Tabula Muris Consortium, 2018). Specifically, two files have been retrieved:
 1. Metadata table: a file containing information about the single cells, among which the identification code and the cell type annotation (cell_ontology_class).
 2. Genes-cells table: a file containing the single-cell sequencing data, where columns are the cells and rows are genes; in the grid, there are the expression levels for each gene in each cell.
-In the final report, `AML_LTM_GO.ipynb", more details can be found.
+In the final report, `AML_LTM_GO.ipynb`, more details can be found.
 
 ## Data preprocessing
-Data preprocessing is a foundational step in machine learning and data science because real-world data is often incomplete, inconsistent, and complex. Preprocessing improves data quality and model performance by transforming raw data into a clean, structured, and analyzable format. Conditions such as missing data, outliers, and inconsistency are dealt with in this step.
+Data preprocessing is a foundational step in machine learning and data science because real-world data is often incomplete, inconsistent, and complex. Preprocessing improves data quality and model performance by transforming raw data into a clean, structured, and analyzable format. This step deals with conditions such as missing data, outliers, and inconsistency.
+Four sub-steps typical of data preprocessing of single-cell sequencing data have been carried out: removal of unclassified cells, removal of no-expression genes, removal of housekeeping genes, and data normalisation. The scripts and results of this step can be found in the final report, `AML_LTM_GO.ipynb`.
+
+### Remove unclassified cells
+Some cells in the genes-cells file are not annotated in the annotations table because they lack a cell type classification. They have no associated metadata and, therefore, can not be used for the models. 
+
+### Remove genes with no expression in any of the cells
+Some genes are not expressed in any of the cells, they have a 0 value in all the columns, therefore they are not informative nor useful for the classification problem.
+
+### Removal of housekeeping genes
+Housekeeping genes are genes that are expressed in all cells and cell types; their expression level does not vary between cell types, so they are not informative and unuseful for classification. To determine these genes, the Median Gene Expression within each Cell Type (MGECT) was computed, and genes with zero variance for their MGECT across all cell types were excluded (_Le H, 2022_).
+
+### Data normalisation
+RNA sequencing data often exhibit a wide range of expression values with many low counts and a few high counts. This distribution is typically right-skewed. Log transformation helps normalize these values, making the data more symmetrical and reducing the effect of outliers. This is important for the next steps as feature selection methods (variance thresholding, correlation-based selection, and statistical tests) work better on data that has a normalized distribution. 
+
+## Feature selection
+Feature selection is an important aspect of preparing data for machine learning, as it reduces the dimensionality of the data, improves model performance, and enhances interpretability by selecting the most informative features and eliminating eventual noise. The steps performed here have been: variance thresholding, correlation-based feature selection and standard scaling. The scripts and results of this step can be found in the final report, `AML_LTM_GO.ipynb`.
+
+### Variance thresholding
+Some genes, while not expressed equally between cell types, are expressed at similar levels. Therefore, they are not very informative for the classification task. This step aims to remove genes with very low variance (threshold 2.5 _Le H, 2022_) between cell types.
+
+### Correlation-based feature selection
+This step aims to remove redundant and highly correlated genes. The information provided by these genes is redundant.
+
+### Standard scaling 
+Standard scaling ensures that each gene contributes equally to the analysis by having zero mean and unit variance. It is essential to apply dimensionality reduction tecnhiques such as PCA, t-SNE or UMAP.
+
+## Dimensionality reduction
+
+Dimensionality reduction is a significant step in machine learning, especially when dealing with high-dimensional datasets such as single-cell sequencing data. It aims to reduce the number of features while retaining the essential information and structure of the data. This simplification facilitates visualization, reduces computational complexity, and can improve the performance of machine learning models by eliminating noise and redundant features. There are three main dimensionality reduction techniques: PCA, t-SNE and UMAP.
+The scripts of this step can be found in the final report, `AML_LTM_GO.ipynb`. 4 datasets have been created: one without any dimensionality reduction and the other three, each with a different technique. These 4 datasets (final_df, final_df_pca, final_df_tsne, final_df_umap) were used to test both machine learning models. As can be seen from the plots, the classes in the datasets are not well balanced, as some of them have very few examples; nonetheless, it would be a biological artefact to remove them. For these classes (in particular smooth muscle cells), a worse result in the classification is expected because of the lack of examples.
+
+### Principal Component Analysis (PCA)
+It is a widely used method that transforms the data into a set of orthogonal components, capturing the maximum variance with the fewest number of components.
+
+### t-Distributed Stochastic Neighbor Embedding (t-SNE)
+It is a powerful non-linear dimensionality reduction technique, particularly for visualization, as it emphasizes the local structure and maintains the high-dimensional pairwise distances in lower dimensions. It works by minimizing the divergence between two distributions: one representing pairwise similarities in the high-dimensional space and one in the low-dimensional space.
+
+### Uniform Manifold Approximation and Projection (UMAP)
+It is a newer non-linear dimensionality reduction method that balances the preservation of local and global data structures, providing more interpretable and faster results than t-SNE. It’s based on manifold learning.
+
+## Feature encoding and dataset splitting
+Feature encoding is the process of converting categorical data or other types of non-numeric data into a numerical format. The cell types' labels have to be transformed in order for the model to use them.
+The datasets have to be split into training and testing subsets, with a proportion of 80 and 20. The models will be fit on the training data, which have to be representative of the whole dataset; after training, the model will be tested on the testing set, where it will predict the class of the unlabeled cells.
+K-fold Cross-validation, a procedure that helps ensure that the model's performance is consistent and not dependent on a particular split of the data, has also been performed: the training set has been divided into smaller subsets; at every iteration, one of the splits will be used to test the model and test the performance of each parameter (in the case of hyperparameter tuning). The scripts and results of this step can be found in the final report, `AML_LTM_GO.ipynb`.
+
+
