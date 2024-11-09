@@ -110,8 +110,9 @@ In particular, three libraries are often used for ML implementations in python:
 # Data preparation
 ## Data retrieval
 Data has been retrieved from the Mus Muluscus database (The Tabula Muris Consortium, 2018). Specifically, two files have been retrieved:
-1. Metadata table: a file containing information about the single cells, among which the identification code and the cell type annotation (cell_ontology_class).
-2. Genes-cells table: a file containing the single-cell sequencing data, where columns are the cells and rows are genes; in the grid, there are the expression levels for each gene in each cell.
+1. Metadata table: a file containing information about the single cells, among which the identification code and the cell type annotation (cell_ontology_class). It can be found at `dataset/metadata.csv` 
+2. Genes-cells table: a file containing the single-cell sequencing data, where columns are the cells and rows are genes; in the grid, there are the expression levels for each gene in each cell. It can be found at `dataset/Heart-counts.csv`
+
 In the final report, `AML_LTM_GO.ipynb`, more details can be found.
 
 ## Data preprocessing
