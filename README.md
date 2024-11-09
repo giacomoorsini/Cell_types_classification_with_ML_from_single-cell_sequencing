@@ -1,4 +1,4 @@
-# Prediction of cell types in mouse heart tissue from single cell RNA sequencing data with two different machine learning models: Random Forest and Multilayer Perceptron (MLP) neural network
+# Prediction of cell types in mouse heart tissue from single-cell RNA sequencing data with two different machine learning models: Random Forest and Multilayer Perceptron (MLP) neural network
 
 This repository contains the code used for the final project of the Advanced Machine Learning course of the Masters of Bioinformatics at Bologna University.
 
@@ -33,6 +33,7 @@ Authors: Laia Torres Madsdeu, Giacomo Orsini
 - Models benchmarking
   - Hyperparameters tuning
   - Evaluation metrics 
+- Results
   - Random forest
     - Baseline assessment
     - Hyperparameter tuning
@@ -165,15 +166,60 @@ For each machine-learning technique, Random forest (RF and Multilayer Perceptron
 ### Hyperparameters tuning
 Machine learning models have a set of tunable parameters that can substantially change the analysis's outcome. The models were fine-tuned by performing a Grid Search with Cross-Validation. A grid search is a computational technique in which different established sets of hyperparameters are tested in all their possible combinations. The parameters of each ML method considered in the grid search have been:
 - Random Forest
-  - `n_estimators`: number of decision trees in the random forest. Increasing n_estimators   generally improves the performance of the model until a certain point, where additional trees may not significantly improve accuracy but increase computational cost. In this case, the values used have been 100, 500, 1000, and 1200, exploring a range from a relatively small forest to larger forests, which helps in finding the optimal balance between accuracy and computational efficiency.
-  - `max_features`: determines the maximum number of features to consider when looking for the best split at each node. By restring (or not) the number of features, the right max_features can prevent overfitting and improve the diversity among the trees in the forest. The options chosen were 'sqrt' (square root of the number of features), 'log2' (log base 2 of the number of features), and None (consider all features).
-  - `bootstrap`: indicates whether bootstrap samples are used when building trees. Bootstrap sampling introduces randomness and diversity in each tree, which can improve the overall performance of the forest. If False, the whole dataset is used to build each tree.
+  - `n_estimators`: the number of decision trees in the random forest. Increasing n_estimators generally improves the model's performance until a certain point, when additional trees may not significantly improve accuracy but increase computational cost. In this case, the values used have been 100, 500, 1000, and 1200, exploring a range from a relatively small forest to larger forests, which helps in finding the optimal balance between accuracy and computational efficiency. Default: 100.
+  - `max_features`: determines the maximum number of features to consider when looking for the best split at each node. By restring (or not) the number of features, the right max_features can prevent overfitting and improve the diversity among the trees in the forest. The options chosen were 'sqrt' (square root of the number of features), 'log2' (log base 2 of the number of features), and None (consider all features). Default: sqrt.
+  - `bootstrap`: indicates whether bootstrap samples are used when building trees. Bootstrap sampling introduces randomness and diversity in each tree, which can improve the overall performance of the forest. If False, the whole dataset is used to build each tree. Default: True.
 - Multilayer perceptron
-  - `Number of Layers`: the number of layers that compose the neural network. This can affect the ability to learn complex patterns. Deeper networks can potentially learn more intricate features but can also lead to overfitting.
+  - `Number of Layers`: the number of layers that compose the neural network. This can affect the ability to learn complex patterns. Deeper networks can potentially learn more intricate features but can also lead to overfitting. 
   - `Type of Activation Function`: activation functions (e.g., ReLU, sigmoid, tanh) introduce non-linearity, which is crucial for the network to learn and approximate complex functions. ReLU is usually a common choice for hidden layers; softmax for multi-class classification; sigmoid for binary classification.
   - `Units (Number of Neurons)`: determines the capacity of each layer to learn representations. Too few neurons may limit learning capacity; too many may lead to overfitting.
   - `Dropout Rate`: Dropout helps prevent overfitting by randomly setting a fraction of input units to 0 during training, forcing the network to learn redundant representations.
   - `Learning Rate`: the learning rate controls how much to change the model in response to the estimated error each time the model weights are updated. It is a crucial parameter to tune, and the optimal values can vary widely.
 
 ### Evaluation metrics
+Evaluation metrics are essential for benchmarking the performance of machine learning models, particularly for classification tasks, where it’s crucial to understand not only how often a model is correct (accuracy) but also the nature of its mistakes (precision, recall, F1 score, support). The confusion matrix is a tool for evaluating the performance of a classification model by showing the true and predicted classifications side-by-side. The values of the confusion matrix are used to calculate the metrics above.  For a binary classification task, the confusion matrix has four key elements:
 
+- True Positives (TP): Cases where the model correctly predicted the positive class.
+- True Negatives (TN): Cases where the model correctly predicted the negative class.
+- False Positives (FP) (Type I Error): Cases where the model incorrectly predicted the positive class (a false alarm).
+- False Negatives (FN) (Type II Error): Cases where the model incorrectly predicted the negative class (missed positives).
+
+1. Accuracy: measures the percentage of correct predictions made by the model out of all predictions (TP + TN / N° of predictions).
+2. Precision: measures the proportion of true positive predictions out of all positive predictions the model made, indicating how often the model’s positive predictions are actually correct (TP/ TP + FP).
+3. Recall: measures how well the model captures all actual positive cases in the data (TP / TP + FN).
+4. F1 Score: combines precision and recall into a single metric by calculating their harmonic mean ( 2 * (Precision * Recall / Precision + Recall) )
+5. Support: the number of actual occurrences of each class in the dataset.
+
+## Results
+Hereby, the results obtained by benchmarking the models, as previously stated, are reported and discussed. The full pipeline and scripts can be found in the `AML_LTM_GO.ipynb`.
+
+### Random forest
+#### Baseline assessment
+In this step, the model with default parameters was tested on the 4 different datasets (no reduction, PCA, t-SNE, UMAP).
+The classification reports indicate that the model obtained by training on the original (no dimensionality reduction) data achieved better results, with an accuracy of 0.986. The model obtained from the PCA dataset performed the worst, with an accuracy of 0.879.
+The overall decrease in the performance of the datasets that went through dimensionality reduction could be explained by the loss of significant features; as much as these techniques aim to retain the essential information and structure of the data, there is a loss of information that could lead to worse classification of some cell types, like in this case.
+
+#### Hyperparameters tuning
+Overall, all models (except t-SNE) performed better than the baseline model. Therefore, tuning the hyperparameters improved the predictions.
+The classification reports indicate again that the best model is the one obtained by training on the original data (no dimensionality reduction), with an accuracy of 0.988. The model obtained from the PCA dataset performed the worst, with an accuracy of 0.881.
+Regarding the parameters, the grid search identified the best parameters (for all datasets):
+
+- n_estimators: 1000
+- max_features: sqrt
+- bootstrap: False (True in PCA, t-SNE and UMAP).
+
+The number of decision trees results in a relatively large random forest, while the 'sqrt' (square root of the number of features) restricts the number of features looked at at the split of each node. The absence of Bootstrap indicates that the whole dataset is used. On a side note, more trees equal more computational complexity and, therefore, more time to be calculated. This has to be kept in mind when tuning this parameter: it is possible that for certain types of tasks and situations, a slightly worse classifier that can be trained in a matter of seconds is better suited than a good classifier that takes hours to be trained. Moreover, the misclassifications between the models are very small (sometimes in the order of 2-3).
+The decrease in performance in the datasets that went through dimensionality reduction can again be explained by the loss of significant features; overall, it seems that applying a dimensionality reduction technique on this kind of dataset, a small, feature-rich single-cell sequencing dataset, could lower the performances when using a Random Forest classifier.
+It is also worth mentioning that t-SNE's performance after the hyperparameter tuning was slightly worse than the baseline (0.973 vs 0.972). This can be explained by the fact that, for choosing the parameters, the cross-validation method is performed on the train set, and so, the selected model performed better than the baseline for the training data. However, when applied to the training, it was a bit worse in predicting it.
+
+### Multilayer Perceptron
+#### Baseline Assessment
+The model obtained by training on the original (no dimensionality reduction) data achieved better results, with an accuracy of 0.9896. The model obtained from the PCA dataset was the one that performed the worst, with an accuracy of 0.8548.
+
+Regarding the training and validation accuracy curves, the plots show that the training accuracy (blue line) and validation accuracy (orange line) remain consistent and high, close to 0.8 - 1.0 (100%), throughout the epochs. This indicates that the model maintains a high level of performance on both training and validation data.
+
+Regarding the training and validation loss curves, the loss for both training (blue line) and validation (orange line) starts dropping within the first few epochs, indicating that the model is learning and improving its predictions. After the initial drop, the training loss stabilizes at a low value. The validation loss also remains relatively low and stable. Most importantly, there is almost no fluctuation in the validation loss, indicating that the model is not overfitting.
+
+Overall, these plots indicate that the MLP is performing very well, with some differences between the 4 different models. Indeed, the drop in the loss curves is more sudden in the model trained on the orignal dataset and the accuracy also reaches a high plateau very fast.
+
+The overall decrease in the performance in the datasets that went trough dimensionality reduction could be explained by the loss of signifcant features; as much as these tecnhiques aim to retain the essential information and structure of the data, there is a loss of information that could leed to worse classification of some cell types, such as in this case.
