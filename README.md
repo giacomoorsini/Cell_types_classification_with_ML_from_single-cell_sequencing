@@ -5,7 +5,7 @@ This repository contains the code used for the final project of the Advanced Mac
 Authors: Laia Torres Madsdeu, Giacomo Orsini
 
 # Index
-- Introduction
+- [Introduction] (#Introduction)
   - Aim of the project 
   - The Data
     - Single-cell sequencing
@@ -209,17 +209,56 @@ Regarding the parameters, the grid search identified the best parameters (for al
 - bootstrap: False (True in PCA, t-SNE and UMAP).
 
 The number of decision trees results in a relatively large random forest, while the 'sqrt' (square root of the number of features) restricts the number of features looked at at the split of each node. The absence of Bootstrap indicates that the whole dataset is used. On a side note, more trees equal more computational complexity and, therefore, more time to be calculated. This has to be kept in mind when tuning this parameter: it is possible that for certain types of tasks and situations, a slightly worse classifier that can be trained in a matter of seconds is better suited than a good classifier that takes hours to be trained. Moreover, the misclassifications between the models are very small (sometimes in the order of 2-3).
-The decrease in performance in the datasets that went through dimensionality reduction can again be explained by the loss of significant features; overall, it seems that applying a dimensionality reduction technique on this kind of dataset, a small, feature-rich single-cell sequencing dataset, could lower the performances when using a Random Forest classifier.
+The decrease in performance in the datasets that underwent dimensionality reduction can again be explained by the loss of significant features; overall, it seems that applying a dimensionality reduction technique to this kind of dataset, a small, feature-rich single-cell sequencing dataset, could lower the performances when using a Random Forest classifier.
 It is also worth mentioning that t-SNE's performance after the hyperparameter tuning was slightly worse than the baseline (0.973 vs 0.972). This can be explained by the fact that, for choosing the parameters, the cross-validation method is performed on the train set, and so, the selected model performed better than the baseline for the training data. However, when applied to the training, it was a bit worse in predicting it.
 
 ### Multilayer Perceptron
 #### Baseline Assessment
 The model obtained by training on the original (no dimensionality reduction) data achieved better results, with an accuracy of 0.9896. The model obtained from the PCA dataset was the one that performed the worst, with an accuracy of 0.8548.
+Indeed, the drop in the loss curves is more sudden in the model trained on the original dataset, and the accuracy also reaches a high plateau very fast.
+Overall, the training and validation accuracy curves, as well as the training and validation loss curves,  indicate that the MLP is performing very well, with some differences between the 4 different models.
+The overall decrease in the performance of the datasets that went through dimensionality reduction could be explained by the loss of significant features; as much as these techniques aim to retain the essential information and structure of the data, there is a loss of information that could lead to worse classification of some cell types, such as in this case.
 
-Regarding the training and validation accuracy curves, the plots show that the training accuracy (blue line) and validation accuracy (orange line) remain consistent and high, close to 0.8 - 1.0 (100%), throughout the epochs. This indicates that the model maintains a high level of performance on both training and validation data.
+#### Hyperparameters tuning 
+Overall, all models performed better than the original model. Therefore, tuning the hyperparameters improved the predictions.
 
-Regarding the training and validation loss curves, the loss for both training (blue line) and validation (orange line) starts dropping within the first few epochs, indicating that the model is learning and improving its predictions. After the initial drop, the training loss stabilizes at a low value. The validation loss also remains relatively low and stable. Most importantly, there is almost no fluctuation in the validation loss, indicating that the model is not overfitting.
+The classification reports follow the pattern already shown with the previous method: the best model is again the one obtained on the original data (no dimensionality reduction), with an accuracy of 0.993. The model obtained from the PCA dataset performed the worst, with an accuracy of 0.876.
 
-Overall, these plots indicate that the MLP is performing very well, with some differences between the 4 different models. Indeed, the drop in the loss curves is more sudden in the model trained on the orignal dataset and the accuracy also reaches a high plateau very fast.
+Regarding the parameters, the grid search has identified the best parameters:
 
-The overall decrease in the performance in the datasets that went trough dimensionality reduction could be explained by the loss of signifcant features; as much as these tecnhiques aim to retain the essential information and structure of the data, there is a loss of information that could leed to worse classification of some cell types, such as in this case.
+- Dropout Rate: 0.3
+- Activation Function: relu
+- Learning Rate: 0.003373201432675782
+- Number of Layers: 1
+- Units in First Layer: 64
+
+The best multilayer perceptron has just one hidden layer, and the first layer is composed of 64 neurons. This architecture is relatively simple for an NN. This means that the data we provided was not particularly complex; this is also coherent when considering that dimensionality reduction lowered the performances, similarly to what happened using a Random Forest.
+
+## Conclusions
+In conclusion, two famous machine learning methods (Random forest and multilayer Perceptron) have been tested on a dataset of single-cell RNA sequencing data. The computational challenge presented here also represents a significant biological effort, as single-cell sequencing data offer great insight into many biological questions. The choice of using a public, well-curated and broad dataset built on the Mus Musculus (mouse) model organism granted an extensive and representative amount of data. Moreover, the choice of focusing on the heart tissue and building classifiers for the cell types in it defined the borders of our computational challenge.
+
+After a thorough data preprocessing step, we decided to create 4 datasets to evaluate the impact of dimensionality reduction techniques:
+
+- original dataset (no dimensionality reduction)
+- PCA dataset
+- t-SNE dataset
+- UMAP dataset
+Together with a cross-validation approach, the best hyperparameters of the models have been found using a grid search. The hyperparameters that have been tuned are `n_estimators, max_features, bootstrap` for the random forest, and `n_layers, dropout_rate, learning_rate, activation_function and n_units` for the MLP.
+
+After training and building our Random forests and Multilayer perceptrons, the result indicates that:
+
+The best random forest obtained an accuracy of 0.988 on the original dataset with the parameters:
+- n_estimators: 1000
+- max_features: sqrt
+- Bootstrap: False
+The best multilayer perceptron obtained an accuracy of 0.993 on the original dataset with the parameters:
+- Dropout Rate: 0.3
+- Activation Function: relu
+- Learning Rate: 0.003373201432675782
+- Number of Layers: 1
+- Units in First Layer: 64
+From these results, the following conclusions can be drawn:
+
+- Multilayer perceptron is a better classifier: for this task, the Multilayer perceptron has been found to yield better results than the Random Forest. Neural networks are known for their ability to learn highly complex and non-linear relationships in data. Single-cell sequencing datasets often contain intricate patterns and interactions between genes or cells. Random forests, while robust in handling high-dimensional data, may not always extract the most informative features effectively; moreover, random forests may struggle with high-dimensional data if the number of samples is limited, such as in the single-cell dataset, which experiences class unbalance. Neural networks also come with more tuneable parameters, which results in better tuning potential. The small size of the best performing Neural network indicates that the task is relatively easy and doesn't require much computational complexity (deeper architecture). It is, although quite remarkable, that such a small architecture performs so well on the data, highlighting the power of such models. To be fair, though, it is worth mentioning that both RF and MLP performed very well.
+
+- Dimensionality reduction is not necessary: the dimensionality reduction techniques applied (PCA, UMAP, t-SNE) have proven to be ineffective in increasing the performances of our classifiers. PCA, in particular, leads to visibly worse results. The explanation for this can be found in the fact that during the data preprocessing and feature selection procedures, we extracted an informative and noise-deprived set of features. Reducing its size led to the loss of significant features rather than a simplification of the complexity, which in turn impacted the classifier's performance. This also proves that the data preprocessing step was done correctly.
